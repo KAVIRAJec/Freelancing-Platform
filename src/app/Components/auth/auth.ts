@@ -1,5 +1,5 @@
-import { NgIf } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CreateClientModel } from '../../Models/Client.model';
 import { CreateFreelancerModel } from '../../Models/Freelancer.model';
@@ -7,20 +7,31 @@ import { AuthenticationService } from '../../Services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { registerUserByRole } from './auth.store';
+import { Actions, ofType } from '@ngrx/effects';
+import * as ClientActions from '../../NgRx/Client/client.actions';
+import * as FreelancerActions from '../../NgRx/Freelancer/freelancer.actions';
+import { selectClientError, selectClientLoading } from '../../NgRx/Client/client.selector';
+import { selectFreelancerError, selectFreelancerLoading } from '../../NgRx/Freelancer/freelancer.selector';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-auth',
-  imports: [ReactiveFormsModule, NgIf],
+  imports: [ReactiveFormsModule, NgIf, AsyncPipe],
   templateUrl: './auth.html',
   styleUrl: './auth.css'
 })
-export class Auth {
+export class Auth implements OnDestroy {
   isFlipped = false;
   loginForm: FormGroup;
   registerForm: FormGroup;
   role: 'client' | 'freelancer' = 'client';
   store = inject(Store);
+  private actions$ = inject(Actions);
+  loading$ = this.store.select(selectClientLoading);
+  error$ = this.store.select(selectClientError);
+  private destroy$ = new Subject<void>();
+  loginLoading = false;
 
   constructor(private fb: FormBuilder, private AuthService: AuthenticationService, private toastr: ToastrService, private router: Router) {
     this.loginForm = this.fb.group({
@@ -28,6 +39,18 @@ export class Auth {
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
     this.registerForm = this.createRegisterForm('client');
+
+    // Listen for registration success actions
+    this.actions$
+      .pipe(
+        ofType(ClientActions.addClientSuccess, FreelancerActions.addFreelancerSuccess),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.toastr.success('Registration successful!', 'Success');
+        this.isFlipped = false; // Optionally flip back to login
+        this.registerForm.reset();
+      });
   }
 
   flipCard(event: Event) {
@@ -37,25 +60,26 @@ export class Auth {
 
   onLogin() {
     if (this.loginForm.valid) {
-      console.log('Login:', this.loginForm.value);
+      this.loginLoading = true;
       this.AuthService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
         next: (response) => {
-          console.log('Login successful:', response.message);
+          this.loginLoading = false;
           this.toastr.success('Login successful!', 'Success');
-          // Redirect to the dashboard or home page
           this.router.navigate(['/home']);
         },
         error: (error) => {
-          console.error('Login failed:', error);
+          this.loginLoading = false;
           // Extract the first validation error message from the error object
           let errorMessage = 'Login failed. Please try again.';
           if (error?.errors && typeof error.errors === 'object') {
             const firstKey = Object.keys(error.errors)[0];
-            if (firstKey && Array.isArray(error.errors[firstKey]) && error.errors[firstKey].length > 0) {
+            if (error && typeof error === 'object' && 'message' in error) {
+              this.toastr.error((error as any).message, 'Error');
+            } else if (firstKey && Array.isArray(error.errors[firstKey]) && error.errors[firstKey].length > 0) {
               errorMessage = error.errors[firstKey][0];
+              this.toastr.error(errorMessage, 'Error');
             }
           }
-          this.toastr.error(errorMessage, 'Error');
         }
       });
     } else {
@@ -67,16 +91,45 @@ export class Auth {
   onRoleChange(role: 'client' | 'freelancer') {
     this.role = role;
     this.registerForm = this.createRegisterForm(role);
+    if (role === 'client') {
+      this.loading$ = this.store.select(selectClientLoading);
+      this.error$ = this.store.select(selectClientError);
+    } else {
+      this.loading$ = this.store.select(selectFreelancerLoading);
+      this.error$ = this.store.select(selectFreelancerError);
+    }
   }
 
   onRegister() {
     if (this.registerForm.valid) {
       const data = this.registerForm.value;
-      registerUserByRole(this.store, this.role, data);
-      this.toastr.success('Registration submitted!', 'Success');
-    } else {
-      this.registerForm.markAllAsTouched();
+      if (this.role === 'client') {
+          this.store.dispatch(ClientActions.addClient({ client: data as CreateClientModel }));
+        } else {
+          this.store.dispatch(FreelancerActions.addFreelancer({ freelancer: data as CreateFreelancerModel }));
+        }
+        // Extract error message from the store's latest error state
+        let errorMessage = 'Registration failed. Please try again.';
+        this.error$.subscribe(error => {
+          if (error && typeof error === 'object' && 'message' in error) {
+            this.toastr.error((error as any).message, 'Error');
+          } else if (error && typeof error === 'object' && 'errors' in error) {
+            console.log("err", error)
+            const firstKey = Object.keys((error as any).errors)[0];
+            if (firstKey && Array.isArray((error as any).errors[firstKey]) && (error as any).errors[firstKey].length > 0) {
+              errorMessage = (error as any).errors[firstKey][0];
+              this.toastr.error(errorMessage, 'Error')
+            }
+          } else if (typeof error === 'string') {
+            this.toastr.error(error, 'Error');
+          } else {
+            this.toastr.error(errorMessage, 'Error');
+          }
+        });
+
+        
     }
+        
     this.loginForm.reset();
   }
 
@@ -122,4 +175,9 @@ export class Auth {
   get regExperienceYears() { return this.registerForm.get('experienceYears'); }
   get regHourlyRate() { return this.registerForm.get('hourlyRate'); }
   get regRole() { return this.registerForm.get('role'); }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

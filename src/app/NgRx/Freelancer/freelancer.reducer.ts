@@ -13,6 +13,9 @@ export const freelancerReducer = createReducer(initialFreelancerState,
         ...state, loading: false, error
     })),
 
+    on(FreelancerActions.addFreelancer, state => ({
+        ...state, loading: true, error: null
+    })),
     on(FreelancerActions.addFreelancerSuccess, (state, { freelancer }) => ({
         ...state,
         freelancers: [...state.freelancers, freelancer],
