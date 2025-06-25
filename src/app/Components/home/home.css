@@ -28,3 +28,27 @@
 .flip-card-back {
   transform: rotateY(180deg);
 }
+
+/* Carousel Animation */
+@keyframes slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-slide {
+  animation: slide 30s linear infinite;
+}
+
+/* Optional: Make sure the carousel repeats smoothly */
+.overflow-hidden .flex {
+  will-change: transform;
+}
+
+/* Ensure hover card transitions smoothly (already handled by Tailwind, but can reinforce) */
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1 !important;
+}
