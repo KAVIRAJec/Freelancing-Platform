@@ -35,3 +35,23 @@ background: theme('colors.clr-babyPink');
   0%,5%  {left: 0%}
   95%,to {left: 70%}
 }
+
+/* custom colors */
+.primary-cta {
+  color: #1C2155;
+}
+.primary-section{
+  color:#065A82;
+}
+.soft-pink {
+  color:#FFD9DA;
+}
+.muted-purple {
+  color:#9882AC;
+}
+.primary-header{
+  color:#BB8037;
+}
+.light-gray{
+  color:#D4D4D4;
+}
