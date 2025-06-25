@@ -16,6 +16,7 @@ export class AuthenticationService {
     constructor(private http: HttpClient) {
         this.baseUrl = environment.baseUrl;
     }
+
     login(email: string, password: string) {
         return this.http.post<ApiResponse<AuthenticationModel>>(
             `${this.baseUrl}/auth/login`, { email, password }
@@ -43,6 +44,7 @@ export class AuthenticationService {
         .pipe(
             tap((response) => {
                 if (response.success) {
+                    sessionStorage.setItem('authToken', response.data.token);
                     this.authDetails.next(response.data);
                 }
             })

@@ -1,11 +1,11 @@
 import { AsyncPipe, NgIf } from '@angular/common';
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CreateClientModel } from '../../Models/Client.model';
 import { CreateFreelancerModel } from '../../Models/Freelancer.model';
 import { AuthenticationService } from '../../Services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Actions, ofType } from '@ngrx/effects';
 import * as ClientActions from '../../NgRx/Client/client.actions';
@@ -21,7 +21,7 @@ import { takeUntil } from 'rxjs/operators';
   templateUrl: './auth.html',
   styleUrl: './auth.css'
 })
-export class Auth implements OnDestroy {
+export class Auth implements OnInit, OnDestroy {
   isFlipped = false;
   loginForm: FormGroup;
   registerForm: FormGroup;
@@ -33,7 +33,15 @@ export class Auth implements OnDestroy {
   private destroy$ = new Subject<void>();
   loginLoading = false;
 
-  constructor(private fb: FormBuilder, private AuthService: AuthenticationService, private toastr: ToastrService, private router: Router) {
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['mode'] === 'register') {
+        this.flipCard(new Event(''));
+      }
+    });
+  }
+
+  constructor(private fb: FormBuilder, private AuthService: AuthenticationService, private toastr: ToastrService, private router: Router, private route: ActivatedRoute) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -122,8 +130,6 @@ export class Auth implements OnDestroy {
             }
           } else if (typeof error === 'string') {
             this.toastr.error(error, 'Error');
-          } else {
-            this.toastr.error(errorMessage, 'Error');
           }
         });
 

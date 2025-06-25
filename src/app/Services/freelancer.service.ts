@@ -4,6 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { ApiResponse } from "../Models/ApiResponse.model";
 import { CreateFreelancerModel, FreelancerModel, UpdateFreelancerModel } from "../Models/Freelancer.model";
 import { PaginationModel } from "../Models/PaginationModel";
+import { SkillModel } from "../Models/Skill.model";
 
 @Injectable({providedIn: "root"})
 export class FreelancerService {
@@ -20,9 +21,18 @@ export class FreelancerService {
     getFreelancerById(freelancerId: string) {
         return this.http.get<ApiResponse<FreelancerModel>>(`${this.baseUrl}/freelancer/${freelancerId}`);
     }
-    getAllFreelancers(page: number = 1, pageSize: number = 10) {
+    getAllFreelancers(
+        page: number = 1,
+        pageSize: number = 10,
+        search?: string,
+        sortBy?: string
+    ) {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (search) params += `&search=${encodeURIComponent(search)}`;
+        if (sortBy) params += `&sortBy=${encodeURIComponent(sortBy)}`;
         return this.http.get<ApiResponse<{ data: FreelancerModel[]; pagination: PaginationModel }>>(
-            `${this.baseUrl}/freelancer?page=${page}&pageSize=${pageSize}`);
+            `${this.baseUrl}/freelancer${params}`
+        );
     }
     updateFreelancer(freelancerId: string, freelancer: UpdateFreelancerModel) {
         return this.http.put<ApiResponse<FreelancerModel>>(`${this.baseUrl}/freelancer/${freelancerId}`, freelancer);

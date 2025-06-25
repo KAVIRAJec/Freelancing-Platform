@@ -3,7 +3,11 @@ import { FreelancerModel, CreateFreelancerModel, UpdateFreelancerModel } from ".
 import { PaginationModel } from "../../Models/PaginationModel";
 
 export const loadFreelancers = createAction('[Freelancer] Load Freelancers',
-    props<{ page?: number; pageSize?: number }>()
+    props<{ page?: number; pageSize?: number; 
+    search?: string;
+    skill?: string;
+    location?: string;
+    sortBy?: string; }>()
 );
 export const loadFreelancersSuccess = createAction('[Freelancer] Load Freelancers Success', 
     props<{ freelancers: FreelancerModel[], pagination: PaginationModel }>());

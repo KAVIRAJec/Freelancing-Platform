@@ -12,8 +12,8 @@ export class ProjectEffects {
     loadProjects$ = createEffect(() =>
         this.actions$.pipe(
             ofType(ProjectActions.loadProjects),
-            mergeMap(({ page, pageSize }) =>
-                this.projectService.getAllProjects(page, pageSize).pipe(
+            mergeMap(({ page, pageSize, search, sortBy }) =>
+                this.projectService.getAllProjects(page, pageSize, search, sortBy).pipe(
                     map(res => {
                         if (res.success) {
                             return ProjectActions.loadProjectsSuccess({ 

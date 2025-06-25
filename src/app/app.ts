@@ -15,15 +15,14 @@ export class App implements OnInit{
   ngOnInit(): void {
     this.tryAutoLogin();
   }
-
+  
+  constructor(private authService: AuthenticationService, private store: Store, private router: Router) {}
   protected title = 'Freelancing Project';
-  constructor(private authService: AuthenticationService, private store: Store, private router: Router) {
-  }
   
   tryAutoLogin() {
   const accessToken = sessionStorage.getItem('authToken');
   if (!accessToken) {
-    console.log('No access token found, redirecting to login.');
+    console.log('No access token found, trying to login.');
     this.authService.refreshToken().subscribe({
       next: (response) => {
         if (response.success) {

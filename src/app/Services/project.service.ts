@@ -21,14 +21,31 @@ export class ProjectService {
         return this.http.get<ApiResponse<ProjectModel>>(`${this.baseUrl}/project/${projectId}`);
     }
 
-    getProjectsByClientId(clientId: string, page: number = 1, pageSize: number = 10) {
+    getProjectsByClientId(
+        clientId: string, 
+        page: number = 1, 
+        pageSize: number = 10,
+        search?: string,
+        sortBy?: string
+    ) {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (search) params += `&search=${encodeURIComponent(search)}`;
+        if (sortBy) params += `&sortBy=${encodeURIComponent(sortBy)}`;
         return this.http.get<ApiResponse<{ data: ProjectModel[]; pagination: PaginationModel }>>(
-            `${this.baseUrl}/project/client/${clientId}?page=${page}&pageSize=${pageSize}`
+            `${this.baseUrl}/project/client/${clientId}${params}`
         );
     }
-    getAllProjects(page: number = 1, pageSize: number = 10) {
+    getAllProjects(
+        page: number = 1,
+        pageSize: number = 10,
+        search?: string,
+        sortBy?: string
+    ) {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (search) params += `&search=${encodeURIComponent(search)}`;
+        if (sortBy) params += `&sortBy=${encodeURIComponent(sortBy)}`;
         return this.http.get<ApiResponse<{ data: ProjectModel[]; pagination: PaginationModel }>>(
-            `${this.baseUrl}/project?page=${page}&pageSize=${pageSize}`
+            `${this.baseUrl}/project${params}`
         );
     }
     updateProject(projectId: string, project: ProjectModel) {

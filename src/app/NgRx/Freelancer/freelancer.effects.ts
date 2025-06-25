@@ -12,8 +12,8 @@ export class FreelancerEffects {
     loadFreelancers$ = createEffect(() =>
         this.actions$.pipe(
             ofType(FreelancerActions.loadFreelancers),
-            mergeMap(({ page, pageSize }) =>
-                this.freelancerService.getAllFreelancers(page, pageSize).pipe(
+            mergeMap(({ page, pageSize, search, sortBy }) =>
+                this.freelancerService.getAllFreelancers(page, pageSize, search, sortBy).pipe(
                     map(res => {
                         if (res.success) {
                             return FreelancerActions.loadFreelancersSuccess({ 

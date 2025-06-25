@@ -3,7 +3,11 @@ import { ProjectModel } from "../../Models/Project.model";
 import { PaginationModel } from "../../Models/PaginationModel";
 
 export const loadProjects = createAction('[Project] Load Projects',
-    props<{ page?: number; pageSize?: number }>()
+    props<{ page?: number; 
+        pageSize?: number;
+        search?: string; 
+        sortBy?: string; 
+     }>()
 
 );
 export const loadProjectsSuccess = createAction('[Project] Load Projects Success', 
