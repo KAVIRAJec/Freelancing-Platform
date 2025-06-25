@@ -3,6 +3,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { Menubar } from "./Components/menubar/menubar";
 import { AuthenticationService } from './Services/auth.service';
 import { Store } from '@ngrx/store';
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-root',

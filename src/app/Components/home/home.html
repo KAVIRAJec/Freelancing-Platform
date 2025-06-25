@@ -38,7 +38,7 @@
       <div class="flip-card-inner">
         <!-- Front -->
         <div class="flip-card-front bg-white">
-          <img src="assets/HomePage1.jpeg" alt="Web Development" class="w-full h-full object-cover" />
+          <img ngSrc="assets/HomePage1.jpeg" alt="Web Development" width="400" height="256" class="w-full h-full object-cover" />
         </div>
         <!-- Back -->
         <div class="flip-card-back bg-primary-section text-white flex flex-col items-center justify-center px-4 text-center">
@@ -53,7 +53,7 @@
       <div class="flip-card-inner">
         <!-- Front -->
         <div class="flip-card-front bg-white">
-          <img src="assets/HomePage2.jpeg" alt="Digital Marketing" class="w-full h-full object-cover" />
+          <img ngSrc="assets/HomePage2.jpeg" alt="Digital Marketing" height="256" width="400" class="w-full h-full object-cover" />
         </div>
         <!-- Back -->
         <div class="flip-card-back bg-muted-purple text-white flex flex-col items-center justify-center px-4 text-center">
@@ -68,7 +68,7 @@
       <div class="flip-card-inner">
         <!-- Front -->
         <div class="flip-card-front bg-white">
-          <img src="assets/HomePage4.jpeg" alt="Content Creator" class="w-full h-full object-cover" />
+          <img ngSrc="assets/HomePage4.jpeg" alt="Content Creator" height="256" width="400" class="w-full h-full object-cover" />
         </div>
         <!-- Back -->
         <div class="flip-card-back bg-soft-pink text-primary-cta flex flex-col items-center justify-center px-4 text-center">
@@ -83,7 +83,7 @@
       <div class="flip-card-inner">
         <!-- Front -->
         <div class="flip-card-front bg-white">
-          <img src="assets/HomePage3.jpeg" alt="UI/UX Designer" class="w-full h-full object-cover" />
+          <img ngSrc="assets/HomePage3.jpeg" alt="UI/UX Designer" height="256" width="400" class="w-full h-full object-cover" />
         </div>
         <!-- Back -->
         <div class="flip-card-back bg-primary-cta text-white flex flex-col items-center justify-center px-4 text-center">
@@ -97,7 +97,7 @@
 </section>
 
 <!-- Section 3 -->
-<div class="min-h-screen w-full flex flex-col md:flex-row">
+<div class="max-h-screen w-full flex flex-col md:flex-row">
   <!-- Left: Background Video -->
   <div class="w-full md:w-1/2 flex items-center justify-center bg-gray-100">
     <video
@@ -116,7 +116,7 @@
   <div class="w-full md:w-1/2 flex flex-col justify-center px-6 sm:px-10 md:px-12 py-10 bg-gray-100 text-primary-header font-['Raleway'] space-y-8 animate-fade-in-up">
     <div class="transition duration-700 ease-in-out transform hover:scale-105">
       <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-cta">
-        Hire Smart! Work Fast! Pay Fair!
+        Hire Smart!<br> Work Fast! Pay Fair!
       </p>
       <p class="text-base sm:text-lg md:text-lg text-muted-purple mt-2">
         Unlock top talent across the globe. Our platform connects you with verified freelancers who deliver quality work — on time and within budget.
@@ -126,7 +126,7 @@
 
     <div class="transition duration-700 ease-in-out transform hover:scale-105">
       <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-cta">
-        Your Skills! Our Platform! Unlimited Growth!
+        Your Skills!<br> Our Platform! Unlimited Growth!
       </p>
       <p class="text-base sm:text-lg md:text-lg text-muted-purple mt-2">
         Join a community built for your success. Bid on top projects, earn consistently, and grow your reputation — all in one place.
@@ -137,37 +137,52 @@
 </div>
 
 <!-- Section 4: Animated Counts -->
-<section class="bg-white py-12 px-6">
-  <!-- 🧮 Count Section -->
-  <div class="flex flex-col sm:flex-row justify-center items-center gap-10 mt-12">
-    <div class="bg-white shadow-lg rounded-2xl p-6 w-64 text-center transition transform duration-500 hover:scale-105 hover:shadow-xl">
-      <div class="text-primary-cta text-5xl font-extrabold mb-2 animate-pulse">
-        {{ animatedProjectCount }}
+<section class="relative bg-gradient-to-br from-white via-purple-50 to-blue-50 py-16 px-6 shadow-inner" #countSection>
+  <div class="absolute inset-0 pointer-events-none select-none opacity-10 bg-[url('assets/HomePage1.jpeg')] bg-cover bg-center rounded-3xl blur-sm"></div>
+  <div class="relative z-10 flex flex-col items-center">
+    <h2 class="text-4xl sm:text-5xl font-extrabold text-primary-cta mb-4 drop-shadow-lg tracking-tight text-center">
+      Platform Impact: Our Growing Community
+    </h2>
+    <p class="text-lg sm:text-xl text-muted-purple mb-12 text-center max-w-2xl">
+      Real-time stats showing the vibrant activity on FreelanceHub. Join thousands of clients and freelancers making projects happen every day!
+    </p>
+    <div class="flex flex-col sm:flex-row justify-center items-center gap-10 mt-4">
+      <div class="bg-white/90 shadow-xl rounded-2xl p-8 w-72 text-center transition transform duration-500 hover:scale-105 hover:shadow-2xl border-t-4 border-primary-cta">
+        <div class="text-primary-cta text-6xl font-extrabold mb-2 animate-pulse drop-shadow-md">
+          {{ animatedProjectCount }}+
+        </div>
+        <div class="text-xl text-gray-700 font-bold mb-1">Projects Posted</div>
+        <div class="mt-1 text-base text-gray-400">Trusted by clients globally</div>
       </div>
-      <div class="text-lg text-gray-600 font-semibold">Projects Posted</div>
-      <div class="mt-1 text-sm text-gray-400">Trusted by clients globally</div>
-    </div>
 
-    <div class="bg-white shadow-lg rounded-2xl p-6 w-64 text-center transition transform duration-500 hover:scale-105 hover:shadow-xl">
-      <div class="text-primary-cta text-5xl font-extrabold mb-2 animate-pulse">
-        {{ animatedFreelancerCount }}
+      <div class="bg-white/90 shadow-xl rounded-2xl p-8 w-72 text-center transition transform duration-500 hover:scale-105 hover:shadow-2xl border-t-4 border-blue-400">
+        <div class="text-blue-500 text-6xl font-extrabold mb-2 animate-pulse drop-shadow-md">
+          {{ animatedClientCount }}+
+        </div>
+        <div class="text-xl text-gray-700 font-bold mb-1">Clients Hired</div>
+        <div class="mt-1 text-base text-gray-400">From various industries</div>
       </div>
-      <div class="text-lg text-gray-600 font-semibold">Freelancers Registered</div>
-      <div class="mt-1 text-sm text-gray-400">Across all domains & skills</div>
+
+      <div class="bg-white/90 shadow-xl rounded-2xl p-8 w-72 text-center transition transform duration-500 hover:scale-105 hover:shadow-2xl border-t-4 border-pink-400">
+        <div class="text-pink-500 text-6xl font-extrabold mb-2 animate-pulse drop-shadow-md">
+          {{ animatedFreelancerCount }}+
+        </div>
+        <div class="text-xl text-gray-700 font-bold mb-1">Freelancers Registered</div>
+        <div class="mt-1 text-base text-gray-400">Across all domains & skills</div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- section 5 -->
 <!-- Responsive Aesthetic Footer -->
-<!-- Modern Minimal Footer -->
 <footer class="bg-gray-900 text-white py-10 px-6 mt-16">
   <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
     
     <!-- Logo & Description -->
     <div class="flex flex-col items-start gap-3">
       <div class="flex items-center gap-3">
-        <img src="assets/logo.png" alt="Logo" class="h-12 w-12 rounded-full border-2 border-white shadow-md" />
+        <img ngSrc="assets/logo.png" alt="Logo" height="48" width="48" class="h-12 w-12 rounded-full border-2 border-white shadow-md" />
         <span class="text-2xl font-semibold tracking-wide">FreelanceHub</span>
       </div>
       <p class="text-sm text-gray-400 mt-2">
@@ -178,11 +193,11 @@
     <!-- Quick Links -->
     <div class="flex flex-col gap-2 text-sm">
       <h3 class="text-lg font-semibold mb-2">Quick Links</h3>
-      <a href="#" class="hover:text-primary-cta transition">Home</a>
-      <a href="#" class="hover:text-primary-cta transition">Categories</a>
-      <a href="#" class="hover:text-primary-cta transition">Projects</a>
-      <a href="#" class="hover:text-primary-cta transition">About</a>
-      <a href="#" class="hover:text-primary-cta transition">Contact</a>
+      <a routerLink="home" class="hover:text-white transition">Home</a>
+      <a routerLink="findwork" class="hover:text-white transition">Find Work</a>
+      <a routerLink="findexpert" class="hover:text-white transition">Find Expert</a>
+      <a routerLink="auth" class="hover:text-white transition">Login</a>
+      <a routerLink="auth" class="hover:text-white transition">Register</a>
     </div>
 
     <!-- Follow Us -->

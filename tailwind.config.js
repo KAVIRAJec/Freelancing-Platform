@@ -20,6 +20,7 @@ module.exports = {
         'clr-WarmTaupe': '#C1B8A3',
         'clr-BurntOrange': '#D9822B',
         'clr-babyPink': '#FFD9DA',
+        
         'primary-cta': '#1C2155',
         'soft-pink':'#FFD9DA',
         'primary-section': '#065A82',

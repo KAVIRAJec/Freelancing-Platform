@@ -1,4 +1,4 @@
-import { NgIf, NgClass } from '@angular/common';
+import { NgIf, NgClass, NgOptimizedImage } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from '../../Services/auth.service';
 import { AuthenticationModel } from '../../Models/Authentication.model';
@@ -6,7 +6,7 @@ import { RouterLink, Router } from '@angular/router';
 
 @Component({
   selector: 'app-menubar',
-  imports: [NgIf, NgClass, RouterLink],
+  imports: [NgIf, NgClass, RouterLink, NgOptimizedImage],
   templateUrl: './menubar.html',
   styleUrl: './menubar.css'
 })
