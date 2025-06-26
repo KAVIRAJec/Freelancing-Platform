@@ -83,7 +83,7 @@ export class MyProject implements OnInit {
       if (user && ('companyName' in user || 'hourlyRate' in user)) {
         this.user.set(user);
         this.fetchProjects(user);
-        console.log("User logged in:", user);
+        // console.log("User logged in:", user);
       } else if (!sessionStorage.getItem('accessToken')) {
         console.log("User redirect:", user);
         this.user.set(null);
@@ -165,7 +165,7 @@ export class MyProject implements OnInit {
   }
 
   fetchProjects(auth: ClientModel | FreelancerModel, page: number = 1) {
-    console.log('Fetching projects for user:', auth);
+    // console.log('Fetching projects for user:', auth);
     this.isLoading.set(true);
     if ('companyName' in auth) {
       this.projectService.getProjectsByClientId(auth.id, page, this.pageSize).subscribe({
@@ -292,7 +292,7 @@ export class MyProject implements OnInit {
     this.store.dispatch(ProjectActions.deleteProject({ projectId: project.id }));
   }
   viewProposals(project: ProjectModel) {
-    // Redirect to /myproposal with project id
+    this.router.navigate(['/myproposal'], { queryParams: { search: project.title } });
   }
 
   // Search and filter

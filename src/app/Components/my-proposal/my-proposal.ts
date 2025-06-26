@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { ProjectProposalService } from '../../Services/projectProposal.service';
 import { TimespanToReadablePipe } from '../../Pipes/timespan-to-readable.pipe';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-my-proposal',
@@ -33,7 +34,8 @@ export class MyProposal implements OnInit {
     private authService: AuthenticationService,
     private toastr: ToastrService,
     private projectProposalService: ProjectProposalService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private route: ActivatedRoute
   ) {
     this.proposals = this.store.selectSignal(selectAllProposals);
     this.loading = this.store.selectSignal(selectProposalLoading);
@@ -59,6 +61,11 @@ export class MyProposal implements OnInit {
       description: ['', [Validators.required, Validators.maxLength(1000)]],
       proposedAmount: [null, [Validators.required, Validators.min(1)]],
       proposedDuration: ['', [Validators.required]]
+    });
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchTerm.set(params['search']);
+      }
     });
   }
   
@@ -172,7 +179,7 @@ export class MyProposal implements OnInit {
     // Filter by search term (description)
     if (this.searchTerm().trim()) {
       const term = this.searchTerm().toLowerCase();
-      all = all.filter(p => p.description.toLowerCase().includes(term));
+      all = all.filter(p => p.description.toLowerCase().includes(term) || p.project.title.toLowerCase().includes(term));
     }
     return all;
   });

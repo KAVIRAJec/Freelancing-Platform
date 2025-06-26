@@ -35,6 +35,21 @@ export class ProjectService {
             `${this.baseUrl}/project/client/${clientId}${params}`
         );
     }
+
+    getProjectsByFreelancerId(
+        freelancerId: string, 
+        page: number = 1, 
+        pageSize: number = 10,
+        search?: string,
+        sortBy?: string
+    ) {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (search) params += `&search=${encodeURIComponent(search)}`;
+        if (sortBy) params += `&sortBy=${encodeURIComponent(sortBy)}`;
+        return this.http.get<ApiResponse<{ data: ProjectModel[]; pagination: PaginationModel }>>(
+            `${this.baseUrl}/project/freelancer/${freelancerId}${params}`
+        );
+    }
     getAllProjects(
         page: number = 1,
         pageSize: number = 10,
