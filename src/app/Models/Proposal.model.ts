@@ -8,6 +8,7 @@ export class ProposalModel {
     public proposedDuration: string;
     public isActive: boolean;
     public isAccepted: boolean;
+    public isRejected: boolean;
     public createdAt: Date | null;
     public updatedAt: Date | null;
     public deletedAt: Date | null;
@@ -21,6 +22,7 @@ export class ProposalModel {
         this.proposedDuration = '';
         this.isActive = true;
         this.isAccepted = false;
+        this.isRejected = false;
         this.createdAt = null;
         this.updatedAt = null;
         this.deletedAt = null;

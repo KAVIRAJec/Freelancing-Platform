@@ -17,6 +17,7 @@ import { selectProjectError, selectAllProjects } from '../../NgRx/Project/projec
 import { Subscription } from 'rxjs';
 import { Actions, ofType } from '@ngrx/effects';
 import { ProjectProposalService } from '../../Services/projectProposal.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-my-project',
@@ -67,29 +68,27 @@ export class MyProject implements OnInit {
 
   constructor(
     private store: Store,
-    private projectService: ProjectService,
-    private authService: AuthenticationService,
-    private toastr: ToastrService,
-    private fb: FormBuilder,
-    private freelancerService: FreelancerService,
     private actions$: Actions,
-    private projectProposalService: ProjectProposalService
+    private fb: FormBuilder,
+    private toastr: ToastrService,
+    private authService: AuthenticationService,
+    private projectService: ProjectService,
+    private freelancerService: FreelancerService,
+    private projectProposalService: ProjectProposalService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
-    this.authService.getMe().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.user.set(response.data);
-          this.fetchProjects(response.data);
-        } else {
-          console.error('Failed to fetch user details');
-          this.toastr.error('Failed to fetch user details');
-        }
-      },
-      error: (err) => {
-        console.error('Error fetching user details:', err);
-        this.toastr.error('Error fetching user details');
+    this.authService.user$.subscribe(user => {
+      if (user && ('companyName' in user || 'hourlyRate' in user)) {
+        this.user.set(user);
+        this.fetchProjects(user);
+        console.log("User logged in:", user);
+      } else if (!sessionStorage.getItem('accessToken')) {
+        console.log("User redirect:", user);
+        this.user.set(null);
+        this.toastr.error('You must be logged in to access this page');
+        this.router.navigate(['/auth']);
       }
     });
     this.createProjectForm = this.fb.group({
@@ -106,14 +105,15 @@ export class MyProject implements OnInit {
       duration: ['', [Validators.required, this.durationValidator]],
       requiredSkills: ['', [Validators.required]]
     });
+
     // Subscribe to NgRx project error and show toast
-    this.subscriptions.add(
-      this.store.select(selectProjectError).subscribe(error => {
-        if (error) {
-          this.toastr.error(error);
-        }
-      })
-    );
+    // this.subscriptions.add(
+    //   this.store.select(selectProjectError).subscribe(error => {
+    //     if (error) {
+    //       this.toastr.error(error);
+    //     }
+    //   })
+    // );
     // Subscribe to project list for updates (add/edit)
     this.subscriptions.add(
       this.store.select(selectAllProjects).subscribe(projects => {
@@ -165,6 +165,7 @@ export class MyProject implements OnInit {
   }
 
   fetchProjects(auth: ClientModel | FreelancerModel, page: number = 1) {
+    console.log('Fetching projects for user:', auth);
     this.isLoading.set(true);
     if ('companyName' in auth) {
       this.projectService.getProjectsByClientId(auth.id, page, this.pageSize).subscribe({
@@ -187,7 +188,11 @@ export class MyProject implements OnInit {
       this.projectService.getAllProjects(page, this.pageSize, auth.username).subscribe({
         next: (res) => {
           if(res.success) {
-            const filtered = res?.data?.data.filter((p: ProjectModel) => p.freelancerId === auth.id && ['Completed', 'In Progress', 'Cancelled'].includes(p.status));
+            const filtered = res?.data?.data.filter((p: ProjectModel) => 
+              p.freelancerId === auth.id && 
+              (p.status === 'Completed' || p.status === 'In Progress' || p.status === 'Cancelled')
+            );
+            // console.log('Filtered projects:', filtered);
             this.projects.set(filtered || []);
             this.pagination = res.data.pagination;
             this.totalPages.set(this.pagination?.totalPages || 1);

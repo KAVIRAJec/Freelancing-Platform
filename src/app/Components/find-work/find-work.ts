@@ -3,21 +3,32 @@ import { Store } from '@ngrx/store';
 import { selectAllProjects, selectProjectError, selectProjectLoading, selectProjectPagination } from '../../NgRx/Project/project.selector';
 import * as ProjectActions from '../../NgRx/Project/project.actions';
 import { Router, ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { AbstractControl, FormsModule, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
 import { AsyncPipe, DatePipe, NgFor, NgIf, NgStyle } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { TimespanToReadablePipe } from '../../Pipes/timespan-to-readable.pipe';
+import { AuthenticationService } from '../../Services/auth.service';
+import { ClientModel } from '../../Models/Client.model';
+import { FreelancerModel } from '../../Models/Freelancer.model';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { selectProposalLoading, selectProposalError } from '../../NgRx/Proposal/proposal.selector';
+import * as ProposalActions from '../../NgRx/Proposal/proposal.actions';
+import { Actions, ofType } from '@ngrx/effects';
+import { DurationFormatPipe } from '../../Pipes/duration-format.pipe';
+import { CreateProposalModel } from '../../Models/Proposal.model';
+import { ConvertTimeSpan } from '../../Misc/ConvertTimeSpan';
 
 @Component({
   selector: 'app-find-work',
-  imports: [FormsModule, DatePipe, AsyncPipe, NgIf, NgFor, NgStyle, TimespanToReadablePipe],
+  imports: [FormsModule, DatePipe, DurationFormatPipe, AsyncPipe, NgIf, NgFor, NgStyle, TimespanToReadablePipe, ReactiveFormsModule],
   templateUrl: './find-work.html',
   styleUrl: './find-work.css'
 })
 export class FindWork implements OnInit, OnDestroy {
   projects$: any;
+  freelancers$: any;
   pagination: any = null;
   skills: string[] = [];
   search = '';
@@ -26,12 +37,32 @@ export class FindWork implements OnInit, OnDestroy {
 
   loading$: any;
   error$: any;
+  proposalLoading$;
+  proposalError$;
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
-  constructor(private store: Store, private router: Router, private toastr: ToastrService, private route: ActivatedRoute) {
+  // Proposal modal states
+  showProposalModal = false;
+  proposalForm!: FormGroup;
+  submittingProposal = false;
+  selectedProject: any = null;
+  currentUserId: string = '';
+  private proposalSuccessSub?: any;
+
+  constructor(
+    private store: Store,
+    private router: Router,
+    private toastr: ToastrService,
+    private route: ActivatedRoute,
+    private authService: AuthenticationService,
+    private fb: FormBuilder,
+    private actions$: Actions
+  ) {
     this.loading$ = this.store.select(selectProjectLoading);
     this.error$ = this.store.select(selectProjectError);
+    this.proposalLoading$ = this.store.select(selectProposalLoading);
+    this.proposalError$ = this.store.select(selectProposalError);
   }
 
   ngOnInit() {
@@ -81,6 +112,74 @@ export class FindWork implements OnInit, OnDestroy {
       this.loadPage(1, searchValue);
     });
     this.loadPage(1);
+
+    this.authService.user$.subscribe((user: ClientModel | FreelancerModel | null) => {
+        if (user && 'hourlyRate' in user) {
+          this.freelancers$ = user;
+        } else {
+          this.freelancers$ = null;
+        }
+    });
+
+    this.proposalForm = this.fb.group({
+      description: ['', [Validators.required, Validators.maxLength(1000)]],
+      proposedAmount: [null, [Validators.required, Validators.min(1)]],
+      proposedDuration: ['', [Validators.required, this.durationValidator]]
+    });
+    // Get current user id from authService
+    this.authService.user$.subscribe(user => {
+      if (user && 'id' in user) {
+        this.currentUserId = user.id;
+      }
+    });
+    // Listen for proposal add success/failure
+    this.proposalSuccessSub = this.actions$.pipe(
+      ofType(ProposalActions.addProposalSuccess, ProposalActions.addProposalFailure)
+    ).subscribe(action => {
+      this.submittingProposal = false;
+      if (action.type === ProposalActions.addProposalSuccess.type) {
+        this.toastr.success('Proposal submitted successfully!');
+        this.closeProposalModal();
+      } else {
+        this.toastr.error((action as any).error.message || (action as any).error || 'Failed to submit proposal');
+      }
+    });
+  }
+
+  durationValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+    // Accepts '3d 4h 5m', '120', 'P2DT3H4M', etc.
+    const regex = /^((\d+)d)?\s*((\d+)h)?\s*((\d+)m)?$|^P(\d+D)?(T(\d+H)?(\d+M)?)?$|^\d+$/;
+    if (regex.test(value.trim())) {
+      return null;
+    }
+    return { invalidDuration: true };
+  }
+
+  openProposalModal(project: any) {
+    this.selectedProject = project;
+    this.showProposalModal = true;
+    this.proposalForm.reset();
+  }
+
+  closeProposalModal() {
+    this.showProposalModal = false;
+    this.selectedProject = null;
+  }
+
+  submitProposal() {
+    if (this.proposalForm.invalid || !this.selectedProject) return;
+    this.submittingProposal = true;
+    const form = this.proposalForm.value;
+    const newProposal: CreateProposalModel = {
+      description: form.description,
+      proposedAmount: form.proposedAmount,
+      proposedDuration: ConvertTimeSpan.toCSharpTimeSpan(form.proposedDuration),
+      freelancerId: this.currentUserId,
+      projectId: this.selectedProject.id
+    };
+    this.store.dispatch(ProposalActions.addProposal({ proposal: newProposal }));
   }
 
   changePage(page: number): void {
@@ -109,16 +208,17 @@ export class FindWork implements OnInit, OnDestroy {
     }));
   }
 
+  submitProposalButton(project: any) {
+    if(this.freelancers$) {
+      this.openProposalModal(project);
+    } else {
+      this.toastr.info('Please log in as freelancer to submit a proposal.', 'Info');
+    }
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  viewDetails(project: any) {
-    if(sessionStorage.getItem('accessToken')) {
-      // Navigate to the project details page
-    } else {
-      this.toastr.info('Please log in to view project details.', 'Info');
-    }
+    if (this.proposalSuccessSub) this.proposalSuccessSub.unsubscribe();
   }
 }

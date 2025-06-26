@@ -4,7 +4,7 @@
   <!-- Floating Create Project Button (Client only) -->
     <button
         *ngIf="role() === 'client'"
-        class="absolute top-6 right-6 flex items-center gap-2 rounded-lg bg-primary-cta text-white font-montserrat px-4 py-2.5 shadow-xl text-lg font-semibold hover:bg-primary-cta/90 hover:scale-105 transition-all duration-200 z-50 focus:outline-none focus:ring-2 focus:ring-primary-cta focus:ring-offset-2"
+        class="absolute top-6 right-6 flex items-center gap-2 rounded-lg bg-primary-cta text-white font-montserrat px-4 py-2.5 shadow-xl text-lg font-semibold hover:bg-primary-cta/90 hover:scale-105 transition-all duration-200 z-20 focus:outline-none focus:ring-2 focus:ring-primary-cta focus:ring-offset-2"
         (click)="createProject()"
     >
         <span>Post Project</span>
@@ -70,7 +70,7 @@
     </div>
 
     <!-- Pagination Control -->
-    <div class="flex justify-center mt-8" *ngIf="pagination">
+    <div class="flex justify-center mt-8" *ngIf="pagination && !isLoading() && filteredProjects().length > 0">
         <button class="btn-secondary mx-1" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)">&laquo; Prev</button>
         <ng-container *ngFor="let page of [].constructor(totalPages()); let i = index">
             <button class="btn-secondary mx-1"
@@ -122,7 +122,7 @@
     </div>
 
     <!-- Create Project Modal (Client only) -->
-    <div *ngIf="showCreateProjectModal()" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div *ngIf="showCreateProjectModal()" class="fixed inset-0 bg-clr-CharcoalGray bg-opacity-90 flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg relative animate-fade-in overflow-y-auto max-h-[90vh]">
             <button class="absolute top-4 right-4 text-gray-400 hover:text-primary-cta text-2xl" (click)="closeCreateProjectModal()">&times;</button>
             <h3 class="text-xl font-bold mb-4 text-primary-header">Post a New Project</h3>
@@ -167,7 +167,7 @@
     </div>
 
     <!-- Edit Project Modal (Client only) -->
-    <div *ngIf="showEditProjectModal()" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div *ngIf="showEditProjectModal()" class="fixed inset-0 bg-clr-CharcoalGray bg-opacity-90 flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg relative animate-fade-in overflow-y-auto max-h-[90vh]">
             <button class="absolute top-4 right-4 text-gray-400 hover:text-primary-cta text-2xl" (click)="closeEditProjectModal()">&times;</button>
             <h3 class="text-xl font-bold mb-4 text-primary-header">Edit Project</h3>

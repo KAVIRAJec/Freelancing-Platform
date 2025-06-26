@@ -19,6 +19,8 @@ import { ProjectEffects } from './NgRx/Project/project.effects';
 import { AuthGuard } from './authguard-guard';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from './Components/toast/toastr-provider';
+import { ProposalEffects } from './NgRx/Proposal/proposal.effects';
+import { proposalReducer } from './NgRx/Proposal/proposal.reducer';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -38,6 +40,9 @@ export const appConfig: ApplicationConfig = {
 
     provideState('project', projectReducer),
     provideEffects(ProjectEffects),
+
+    provideState('proposal', proposalReducer),
+    provideEffects(ProposalEffects),
 
     AuthGuard
   ]

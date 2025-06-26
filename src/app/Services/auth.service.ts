@@ -10,8 +10,8 @@ import { ClientModel } from "../Models/Client.model";
 @Injectable({providedIn: "root"})
 export class AuthenticationService {
     private baseUrl: string;
-    private authDetails = new BehaviorSubject<AuthenticationModel | null>(null);
-    isAuthenticated$ = this.authDetails.asObservable();
+    private authDetails = new BehaviorSubject<ClientModel | FreelancerModel | null>(null);
+    user$ = this.authDetails.asObservable();
 
     constructor(private http: HttpClient) {
         this.baseUrl = environment.baseUrl;
@@ -24,7 +24,7 @@ export class AuthenticationService {
             tap((response) => {
                 if (response.success) {
                     sessionStorage.setItem('accessToken', response.data.token);
-                    this.authDetails.next(response.data);
+                    this.getMe().subscribe();
                 }
             })
         );
@@ -45,13 +45,24 @@ export class AuthenticationService {
             tap((response) => {
                 if (response.success) {
                     sessionStorage.setItem('accessToken', response.data.token);
-                    this.authDetails.next(response.data);
+                    this.getMe().subscribe();
                 }
             })
         );
     }
 
     getMe() {
-        return this.http.get<ApiResponse<FreelancerModel | ClientModel>>(`${this.baseUrl}/auth/me`);
+        return this.http.get<ApiResponse<FreelancerModel | ClientModel>>(`${this.baseUrl}/auth/me`)
+        .pipe(
+            tap((response) => {
+                if (response.success) {
+                    this.authDetails.next(response.data);
+                }else {
+                    this.authDetails.next(null);
+                }
+                }, error => {
+                this.authDetails.next(null);
+                })
+        );
     }
 }
