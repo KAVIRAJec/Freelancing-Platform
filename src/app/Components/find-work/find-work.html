@@ -13,7 +13,7 @@
     @if(loading$ | async) {
       <div class="flex flex-col justify-center items-center col-span-full p-20">
         <div class="loader"></div>
-        <div class="text-clr-CharcoalGray mt-8 text-4xl font-raleway font-bold italic">Loading...</div>
+        <div class="text-clr-CharcoalGray mt-8 text-4xl font-lora font-bold italic">Loading...</div>
       </div>
     }
     <div *ngFor="let project of projects$ | async" class="card fade-in">
@@ -27,16 +27,7 @@
         <span class="font-lora font-extrabold text-black">Budget:</span> ${{ project.budget }}
       </div>
       <div class="mt-2 text-sm text-center text-clr-CharcoalGray">
-        <span class="font-lora font-extrabold text-black">Duration:</span>
-        <span *ngIf="project.duration as dur">
-            <ng-container *ngIf="dur">
-                {{ dur.split('.')[0].split('T')[0] }} days
-                <ng-container *ngIf="dur.split('T')[1]">
-                    {{ dur.split('T')[1].split(':')[0] }} h
-                    {{ dur.split('T')[1].split(':')[1] }} m
-                </ng-container>
-            </ng-container>
-        </span>
+        <span class="font-lora font-extrabold text-black">Duration: {{ project.duration | timespanToReadable }}</span>
       </div>
       <div class="mt-2 text-sm">
         <span *ngFor="let skill of project.requiredSkills" class="badge">{{ skill.name }}</span>

@@ -17,7 +17,7 @@
     @if(loading$ | async) {
       <div class="flex flex-col justify-center items-center col-span-full p-20">
         <div class="loader"></div>
-        <div class="text-clr-CharcoalGray mt-8 text-4xl font-raleway font-bold italic">Loading...</div>
+        <div class="text-clr-CharcoalGray mt-8 text-4xl font-lora font-bold italic">Loading...</div>
       </div>
     }
     <div *ngFor="let freelancer of freelancers$ | async" class="card">

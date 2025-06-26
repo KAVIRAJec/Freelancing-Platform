@@ -23,7 +23,7 @@ export class AuthenticationService {
         ).pipe(
             tap((response) => {
                 if (response.success) {
-                    sessionStorage.setItem('authToken', response.data.token);
+                    sessionStorage.setItem('accessToken', response.data.token);
                     this.authDetails.next(response.data);
                 }
             })
@@ -33,7 +33,7 @@ export class AuthenticationService {
     logout() {
         return this.http.post<ApiResponse<string>>(`${this.baseUrl}/auth/logout`, {}).pipe(
             tap(() => {
-                sessionStorage.removeItem('authToken');
+                sessionStorage.removeItem('accessToken');
                 this.authDetails.next(null);
             })
         );
@@ -44,7 +44,7 @@ export class AuthenticationService {
         .pipe(
             tap((response) => {
                 if (response.success) {
-                    sessionStorage.setItem('authToken', response.data.token);
+                    sessionStorage.setItem('accessToken', response.data.token);
                     this.authDetails.next(response.data);
                 }
             })

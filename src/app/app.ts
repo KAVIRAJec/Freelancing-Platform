@@ -21,13 +21,13 @@ export class App implements OnInit{
   protected title = 'Freelancing Project';
   
   tryAutoLogin() {
-  const accessToken = sessionStorage.getItem('authToken');
+  const accessToken = sessionStorage.getItem('accessToken');
   if (!accessToken) {
     console.log('No access token found, trying to login.');
     this.authService.refreshToken().subscribe({
       next: (response) => {
         if (response.success) {
-          sessionStorage.setItem('authToken', response.data.token);
+          sessionStorage.setItem('accessToken', response.data.token);
         } else {
           this.logout();
         }
@@ -40,6 +40,6 @@ export class App implements OnInit{
 }
 
 logout() {
-  sessionStorage.removeItem('authToken');
+  sessionStorage.removeItem('accessToken');
 }
 }

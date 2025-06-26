@@ -126,7 +126,7 @@ export class FindExpert implements OnInit, OnDestroy {
   }
 
   viewDetails(freelancer: any) {
-    if(sessionStorage.getItem('authToken')) {
+    if(sessionStorage.getItem('accessToken')) {
       // Navigate to the freelancer details page
     } else {
       this.toastr.info('Please log in to view freelancer details.', 'Info');

@@ -8,10 +8,11 @@ import { AsyncPipe, DatePipe, NgFor, NgIf, NgStyle } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { TimespanToReadablePipe } from '../../Pipes/timespan-to-readable.pipe';
 
 @Component({
   selector: 'app-find-work',
-  imports: [FormsModule, DatePipe, AsyncPipe, NgIf, NgFor, NgStyle],
+  imports: [FormsModule, DatePipe, AsyncPipe, NgIf, NgFor, NgStyle, TimespanToReadablePipe],
   templateUrl: './find-work.html',
   styleUrl: './find-work.css'
 })
@@ -103,7 +104,8 @@ export class FindWork implements OnInit, OnDestroy {
     this.store.dispatch(ProjectActions.loadProjects({
       page,
       pageSize: this.pageSize,
-      search: search
+      search: search,
+      sortBy: 'Pending'
     }));
   }
 
@@ -113,7 +115,7 @@ export class FindWork implements OnInit, OnDestroy {
   }
 
   viewDetails(project: any) {
-    if(sessionStorage.getItem('authToken')) {
+    if(sessionStorage.getItem('accessToken')) {
       // Navigate to the project details page
     } else {
       this.toastr.info('Please log in to view project details.', 'Info');

@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { ApiResponse } from "../Models/ApiResponse.model";
-import { ProjectModel } from "../Models/Project.model";
+import { CreateProjectModel, ProjectModel, UpdateProjectModel } from "../Models/Project.model";
 import { PaginationModel } from "../Models/PaginationModel";
 
 @Injectable({providedIn: "root"})
@@ -13,7 +13,7 @@ export class ProjectService {
         this.baseUrl = environment.baseUrl;
     }
 
-    createProject(project: ProjectModel) {
+    createProject(project: CreateProjectModel) {
         return this.http.post<ApiResponse<ProjectModel>>(`${this.baseUrl}/project/create`, project);
     }
 
@@ -48,7 +48,7 @@ export class ProjectService {
             `${this.baseUrl}/project${params}`
         );
     }
-    updateProject(projectId: string, project: ProjectModel) {
+    updateProject(projectId: string, project: UpdateProjectModel) {
         return this.http.put<ApiResponse<ProjectModel>>(`${this.baseUrl}/project/${projectId}`, project);
     }
     deleteProject(projectId: string) {

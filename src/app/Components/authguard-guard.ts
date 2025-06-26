@@ -6,7 +6,7 @@ export class AuthGuard implements CanActivate {
   constructor(private router: Router) {}
 
   canActivate(): boolean {
-    const token = sessionStorage.getItem('authToken');
+    const token = sessionStorage.getItem('accessToken');
     if (!token) {
       // If logged in, redirect to home
       this.router.navigate(['/home']);

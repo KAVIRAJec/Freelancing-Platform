@@ -1,41 +1,42 @@
 import { NgIf, NgClass, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { AuthenticationService } from '../../Services/auth.service';
-import { AuthenticationModel } from '../../Models/Authentication.model';
 import { RouterLink, Router } from '@angular/router';
 
 @Component({
   selector: 'app-menubar',
-  imports: [NgIf, NgClass, RouterLink, NgOptimizedImage],
+  imports: [NgClass, RouterLink, NgOptimizedImage],
   templateUrl: './menubar.html',
   styleUrl: './menubar.css'
 })
 export class Menubar implements OnInit {
   showMobileMenu = false;
-  authDetails: AuthenticationModel | null = null;
+  authenticated = signal<boolean>(false);
+  authRole = signal<'freelancer' | 'client' | null>(null);
 
   constructor(private authService: AuthenticationService, private router: Router) { }
 
   ngOnInit(): void {
     this.authService.isAuthenticated$.subscribe(isAuthenticated => {
-      if(!isAuthenticated && sessionStorage.getItem('authToken')) {
+      if(isAuthenticated || sessionStorage.getItem('accessToken')) {
         this.authService.getMe().subscribe({
           next: (response) => {
             if (response.success) {
-              const authModel = new AuthenticationModel();
-              authModel.email = response.data.email;
-              authModel.role = ('hourlyRate' in response.data) ? 'freelancer' : 'client';
-              this.authDetails = authModel;
+              this.authRole.set(('hourlyRate' in response.data) ? 'freelancer' : 'client');
+              this.authenticated.set(true);
             } else {
-              this.authDetails = null;
+              this.authRole.set(null);
+              this.authenticated.set(false);
             }
           },
           error: () => {
-            this.authDetails = null;
+            this.authRole.set(null);
+            this.authenticated.set(false);
           }
         });
       } else {
-        this.authDetails = isAuthenticated;
+        this.authenticated.set(false);
+        this.authRole.set(null);
       }
     });
   }

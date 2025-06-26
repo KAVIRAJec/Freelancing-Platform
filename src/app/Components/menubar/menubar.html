@@ -80,19 +80,20 @@
                       </ul>
                     </div>
                 </li>
-                @if (authDetails?.role === 'freelancer') {
-                    <li><a href="#" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">My Project</a></li>
-                    <li><a href="#" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">My Proposal</a></li>
+                @if (authRole() === 'freelancer') {
+                    <li><a routerLink="myproject" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">My Project</a></li>
+                    <li><a routerLink="myproposal" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">My Proposal</a></li>
                     <li><a routerLink="chat" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">Chat</a></li>
                 }
-                @if (authDetails?.role === 'client') {
-                    <li><a href="#" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">My Project</a></li>
+                @if (authRole() === 'client') {
+                    <li><a routerLink="myproject" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">My Project</a></li>
+                    <li><a routerLink="myproposal" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">My Proposal</a></li>
                     <li><a routerLink="chat" class="text-white px-2 py-1 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105">Chat</a></li>
                 }
             </ul>
         </nav>
     </div>
-    @if (!authDetails) {
+    @if (!authenticated()) {
     <div class="md:flex hidden items-center gap-4">
         <div [routerLink]="['/auth']" [queryParams]="{ mode: 'register' }" class="text-white transition-transform duration-200 hover:scale-105 cursor-pointer">Sign up</div>
         <div routerLink="auth" class="login-btn transition-transform duration-200 hover:scale-105 cursor-pointer">Log In</div>
@@ -112,17 +113,17 @@
             <li><a routerLink="home" class="block px-4 py-2 rounded-lg text-black transition">Home</a></li>
             <li><a routerLink="findexpert" class="block px-4 py-2 rounded-lg text-black transition">Find Expert</a></li>
             <li><a routerLink="findwork" class="block px-4 py-2 rounded-lg text-black transition">Find Work</a></li>
-            @if (authDetails?.role === 'freelancer') {
-                    <li><a href="#" class="block px-4 py-2 rounded-lg text-black transition">My Project</a></li>
-                    <li><a href="#" class="block px-4 py-2 rounded-lg text-black transition">My Proposal</a></li>
+            @if (authRole() === 'freelancer') {
+                    <li><a routerLink="myproject" class="block px-4 py-2 rounded-lg text-black transition">My Project</a></li>
+                    <li><a routerLink="myproposal" class="block px-4 py-2 rounded-lg text-black transition">My Proposal</a></li>
                     <li><a routerLink="chat" class="block px-4 py-2 rounded-lg text-black transition">Chat</a></li>
                 }
-                @if (authDetails?.role === 'client') {
-                    <li><a href="#" class="block px-4 py-2 rounded-lg text-black transition">My Project</a></li>
+                @if (authRole() === 'client') {
+                    <li><a routerLink="myproject" class="block px-4 py-2 rounded-lg text-black transition">My Project</a></li>
                     <li><a routerLink="chat" class="block px-4 py-2 rounded-lg text-black transition">Chat</a></li>
                 }
         </ul>
-        @if (!authDetails) {
+        @if (!authenticated()) {
         <div class="flex flex-col gap-2 mt-6 px-6">
             <div routerLink="auth" class="login-btn">Log In</div>
             <div [routerLink]="['/auth']" [queryParams]="{ mode: 'register' }" class="text-white mb-10 bg-clr-DeepPlum px-4 py-2 rounded-lg text-center cursor-pointer hover:scale-105 transition-transform duration-200">Sign up</div>
