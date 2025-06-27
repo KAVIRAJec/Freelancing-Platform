@@ -14,9 +14,12 @@ export class ProjectProposalService{
         this.baseUrl = environment.baseUrl;
     }
 
-    GetProposalsByProjectId(projectId: string, page: number = 1, pageSize: number = 10) {
+    GetProposalsByProjectId(projectId: string, page: number = 1, pageSize: number = 10, search?: string, sortBy?: string) {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (search) params += `&search=${encodeURIComponent(search)}`;
+        if (sortBy) params += `&sortBy=${encodeURIComponent(sortBy)}`;
         return this.http.get<ApiResponse<{ data: ProposalModel[]; pagination: PaginationModel }>>(
-            `${this.baseUrl}/ProjectProposal/ProjectId/${projectId}?page=${page}&pageSize=${pageSize}`);
+            `${this.baseUrl}/ProjectProposal/ProjectId/${projectId}${params}`);
     }
     AcceptProposal(projectId: string, proposalId: string) {
         return this.http.post<ApiResponse<ProjectModel>>(`${this.baseUrl}/ProjectProposal/Accept`, { projectId, proposalId });

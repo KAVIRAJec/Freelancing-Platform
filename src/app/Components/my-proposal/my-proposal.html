@@ -31,6 +31,24 @@
       </span>
     </div>
   </div>
+  <div class="flex-1 w-full max-w-xs">
+    <label class="block text-sm font-semibold text-primary-cta mb-1">Sort by Status</label>
+    <div class="relative">
+      <select
+        class="input w-full pl-10 pr-4 py-2 rounded-lg border border-primary-cta/40 focus:ring-2 focus:ring-primary-cta focus:border-primary-cta transition-all duration-200 shadow-sm bg-white"
+        [ngModel]="sortBy()"
+        (ngModelChange)="onSortByChange($event)"
+      >
+        <option value="">All</option>
+        <option value="Pending">Pending</option>
+        <option value="Accepted">Accepted</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-primary-cta text-lg">
+        <i class="bi bi-sort-alpha-down"></i>
+      </span>
+    </div>
+  </div>
 </div>
 
 <!-- Loading Spinner -->
@@ -79,6 +97,20 @@
     </div>
   </div>
 </div>
+
+<!-- Pagination Controls (Project-style) -->
+<div class="flex justify-center my-8" *ngIf="paginationModel as pag; else noPag">
+  <div *ngIf="filteredProposals().length > 0">
+    <button class="btn-secondary mx-1" [disabled]="page() === 1" (click)="onPageChange(page() - 1)">&laquo; Prev</button>
+    <ng-container *ngFor="let p of pageNumbers">
+      <button class="btn-secondary mx-1"
+              [ngStyle]="page() === p ? {'background-color': '#4B006E', 'color': '#fff'} : {}"
+              (click)="onPageChange(p)">{{ p }}</button>
+    </ng-container>
+    <button class="btn-secondary mx-1" [disabled]="page() === pag.totalPages" (click)="onPageChange(page() + 1)">Next &raquo;</button>
+  </div>
+</div>
+<ng-template #noPag></ng-template>
 
 <!-- Edit Modal (Reactive Form) -->
 <div *ngIf="showEditModal()" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

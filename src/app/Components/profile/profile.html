@@ -147,9 +147,16 @@
 </div>
 
 <ng-template #loadingTpl>
-  <div class="flex flex-col justify-center items-center p-20">
-    <div class="loader"></div>
-    <div class="text-clr-CharcoalGray mt-8 text-4xl font-lora font-bold italic">Loading...</div>
-  </div>
+    @if(loading()) {
+    <div class="flex flex-col justify-center items-center p-20">
+        <div class="loader"></div>
+        <div class="text-clr-CharcoalGray mt-8 text-4xl font-lora font-bold italic">Loading...</div>
+    </div>
+    } @else {
+    <div class="flex flex-col justify-center items-center p-20">
+        <img src="/assets/notfound.gif" alt="No Data" class="w-44 h-44 object-contain mb-4" />
+        <div class="text-clr-CharcoalGray mt-8 text-4xl font-lora font-bold italic">Please log in to view profile details</div>
+    </div>
+    }
 </ng-template>
 <div *ngIf="error()" class="error">{{ error() }}</div>

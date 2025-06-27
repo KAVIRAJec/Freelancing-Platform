@@ -19,13 +19,26 @@ export class ProposalService{
     GetProposalById(proposalId: string) {
         return this.http.get<ApiResponse<ProposalModel>>(`${this.baseUrl}/proposal/${proposalId}`);
     }
-    GetProposalsByFreelancerId(freelancerId: string, page: number = 1, pageSize: number = 10) {
+    GetProposalsByFreelancerId(freelancerId: string, page: number = 1, pageSize: number = 10, search?: string, sortBy?: string) {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (search) params += `&search=${encodeURIComponent(search)}`;
+        if (sortBy) params += `&sortBy=${encodeURIComponent(sortBy)}`;
         return this.http.get<ApiResponse<{ data: ProposalModel[]; pagination: PaginationModel }>>(
-            `${this.baseUrl}/proposal/freelancer/${freelancerId}?page=${page}&pageSize=${pageSize}`);
+            `${this.baseUrl}/proposal/freelancer/${freelancerId}${params}`);
     }
-    GetAllProposals(page: number = 1, pageSize: number = 10) {
+    GetProposalsByClientId(clientId: string, page: number = 1, pageSize: number = 10, search?: string, sortBy?: string) {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (search) params += `&search=${encodeURIComponent(search)}`;
+        if (sortBy) params += `&sortBy=${encodeURIComponent(sortBy)}`;
         return this.http.get<ApiResponse<{ data: ProposalModel[]; pagination: PaginationModel }>>(
-            `${this.baseUrl}/proposal?page=${page}&pageSize=${pageSize}`);
+            `${this.baseUrl}/proposal/client/${clientId}${params}`);
+    }
+    GetAllProposals(page: number = 1, pageSize: number = 10, search?: string, sortBy?: string) {
+        let params = `?page=${page}&pageSize=${pageSize}`;
+        if (search) params += `&search=${encodeURIComponent(search)}`;
+        if (sortBy) params += `&sortBy=${encodeURIComponent(sortBy)}`;
+        return this.http.get<ApiResponse<{ data: ProposalModel[]; pagination: PaginationModel }>>(
+            `${this.baseUrl}/proposal${params}`);
     }
     UpdateProposal(proposalId: string, proposal: UpdateProposalModel) {
         return this.http.put<ApiResponse<ProposalModel>>(`${this.baseUrl}/proposal/${proposalId}`, proposal);

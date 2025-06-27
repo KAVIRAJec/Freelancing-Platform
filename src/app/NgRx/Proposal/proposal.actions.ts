@@ -3,7 +3,14 @@ import { ProposalModel, CreateProposalModel, UpdateProposalModel } from "../../M
 import { PaginationModel } from "../../Models/PaginationModel";
 
 export const loadProposals = createAction('[Proposal] Load Proposals',
-    props<{ page?: number; pageSize?: number }>()
+    props<{ 
+        clientId?: string;
+        freelancerId?: string;
+        page?: number; 
+        pageSize?: number;
+        search?: string; 
+        sortBy?: string; 
+     }>()
 );
 export const loadProposalsSuccess = createAction('[Proposal] Load Proposals Success', 
     props<{ proposals: ProposalModel[], pagination: PaginationModel }>());
@@ -20,3 +27,17 @@ export const updateProposalFailure = createAction('[Proposal] Update Proposal Fa
 export const deleteProposal = createAction('[Proposal] Delete Proposal', props<{ proposalId: string }>());
 export const deleteProposalSuccess = createAction('[Proposal] Delete Proposal Success', props<{ proposal: ProposalModel }>());
 export const deleteProposalFailure = createAction('[Proposal] Delete Proposal Failure', props<{ error: string }>());
+
+export const loadProposalsByFreelancer = createAction('[Proposal] Load Proposals By Freelancer',
+    props<{ freelancerId: string; page?: number; pageSize?: number; search?: string; sortBy?: string }>()
+);
+export const loadProposalsByFreelancerSuccess = createAction('[Proposal] Load Proposals By Freelancer Success',
+    props<{ proposals: ProposalModel[], pagination: PaginationModel }>());
+export const loadProposalsByFreelancerFailure = createAction('[Proposal] Load Proposals By Freelancer Failure', props<{ error: string }>());
+
+export const loadProposalsByProject = createAction('[Proposal] Load Proposals By Project',
+    props<{ projectId: string; page?: number; pageSize?: number; search?: string; sortBy?: string }>()
+);
+export const loadProposalsByProjectSuccess = createAction('[Proposal] Load Proposals By Project Success',
+    props<{ proposals: ProposalModel[], pagination: PaginationModel, projectId: string }>());
+export const loadProposalsByProjectFailure = createAction('[Proposal] Load Proposals By Project Failure', props<{ error: string }>());

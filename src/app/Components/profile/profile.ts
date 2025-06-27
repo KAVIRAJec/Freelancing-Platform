@@ -18,7 +18,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
-  imports: [NgIf, NgFor, FormsModule, TitleCasePipe],
+  imports: [NgIf, NgFor, FormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
@@ -26,7 +26,7 @@ export class Profile implements OnInit {
   user = signal<ClientModel | FreelancerModel | null>(null);
   role = signal<'client' | 'freelancer' | null>(null);
   projects = signal<ProjectModel[]>([]);
-  loading = signal<boolean>(true);
+  loading = signal<boolean>(false);
   error = signal<string | null>(null);
   showEditModal = signal<boolean>(false);
   showDeactivateModal = signal<boolean>(false);
@@ -67,11 +67,12 @@ export class Profile implements OnInit {
         });
       } else {
         this.authService.user$.subscribe(user => {
-          this.user.set(user);
           if (user && 'companyName' in user) {
+            this.user.set(user);
             this.role.set('client');
             this.fetchProjects(user.id, 'client');
           } else if (user && 'hourlyRate' in user) {
+            this.user.set(user);
             this.role.set('freelancer');
             this.fetchProjects(user.id, 'freelancer');
           }

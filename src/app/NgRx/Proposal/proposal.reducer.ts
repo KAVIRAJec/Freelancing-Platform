@@ -42,4 +42,18 @@ export const proposalReducer = createReducer(initialProposalState,
     on(ProposalActions.deleteProposalFailure, (state, { error }) => ({
         ...state, loading: false, error
     })),
+    on(ProposalActions.loadProposalsByFreelancer, state => ({ ...state, loading: true, error: null })),
+    on(ProposalActions.loadProposalsByFreelancerSuccess, (state, { proposals, pagination }) => ({
+        ...state, proposals, pagination, loading: false, error: null
+    })),
+    on(ProposalActions.loadProposalsByFreelancerFailure, (state, { error }) => ({
+        ...state, loading: false, error
+    })),
+    on(ProposalActions.loadProposalsByProject, state => ({ ...state, loading: true, error: null })),
+    on(ProposalActions.loadProposalsByProjectSuccess, (state, { proposals, pagination }) => ({
+        ...state, proposals, pagination, loading: false, error: null
+    })),
+    on(ProposalActions.loadProposalsByProjectFailure, (state, { error }) => ({
+        ...state, loading: false, error
+    })),
 )

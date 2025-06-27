@@ -1,8 +1,8 @@
-import { Component, computed, effect, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AuthenticationService } from '../../Services/auth.service';
 import { ProposalModel } from '../../Models/Proposal.model';
-import { selectAllProposals, selectProposalLoading, selectProposalError } from '../../NgRx/Proposal/proposal.selector';
+import { selectAllProposals, selectProposalLoading, selectProposalError, selectProposalPagination } from '../../NgRx/Proposal/proposal.selector';
 import * as ProposalActions from '../../NgRx/Proposal/proposal.actions';
 import { ToastrService } from 'ngx-toastr';
 import { ClientModel } from '../../Models/Client.model';
@@ -12,6 +12,7 @@ import { ProjectProposalService } from '../../Services/projectProposal.service';
 import { TimespanToReadablePipe } from '../../Pipes/timespan-to-readable.pipe';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { PaginationModel } from '../../Models/PaginationModel';
 
 @Component({
   selector: 'app-my-proposal',
@@ -20,7 +21,7 @@ import { ActivatedRoute } from '@angular/router';
   standalone: true,
   imports: [CommonModule, FormsModule, TimespanToReadablePipe, ReactiveFormsModule]
 })
-export class MyProposal implements OnInit {
+export class MyProposal {
   proposals;
   loading;
   error;
@@ -28,6 +29,13 @@ export class MyProposal implements OnInit {
   userRole = signal<'client' | 'freelancer' | null>(null);
 
   editForm: FormGroup;
+
+  pagination!: ReturnType<typeof this.store.selectSignal>;
+  page = signal<number>(1);
+  pageSize = signal<number>(5);
+  searchTerm = signal<string>('');
+  selectedProjectTitle = signal<string>('');
+  sortBy = signal<string>('');
 
   constructor(
     private store: Store,
@@ -40,16 +48,38 @@ export class MyProposal implements OnInit {
     this.proposals = this.store.selectSignal(selectAllProposals);
     this.loading = this.store.selectSignal(selectProposalLoading);
     this.error = this.store.selectSignal(selectProposalError);
+    this.pagination = this.store.selectSignal(selectProposalPagination);
     this.authService.user$.subscribe(user => {
       this.user.set(user);
       if (user) {
         if ('companyName' in user) {
-          this.store.dispatch(ProposalActions.loadProposals({}));
           this.userRole.set('client');
         } else {
-          this.store.dispatch(ProposalActions.loadProposals({})); // fallback: load all, filter in template
           this.userRole.set('freelancer');
         }
+      }
+    });
+    effect(() => {
+      const user = this.user();
+      if (!user) return;
+      const role = this.userRole();
+      const page = this.page();
+      const pageSize = this.pageSize();
+      const search = this.searchTerm();
+      if (role === 'freelancer') {
+        this.store.dispatch(ProposalActions.loadProposals({
+          freelancerId: user.id,
+          page,
+          pageSize,
+          search
+        }));
+      } else if (role === 'client') {
+        this.store.dispatch(ProposalActions.loadProposals({
+          clientId: user.id,
+          page,
+          pageSize,
+          search
+        }));
       }
     });
     effect(() => {
@@ -68,8 +98,6 @@ export class MyProposal implements OnInit {
       }
     });
   }
-  
-  ngOnInit() {}
 
   // For edit modal
   editingProposal = signal<ProposalModel | null>(null);
@@ -145,42 +173,70 @@ export class MyProposal implements OnInit {
     this.showEditModal.set(false);
   }
 
-  searchTerm = signal<string>('');
-  selectedProjectTitle = signal<string>('');
-  // Compute unique project titles from proposals
-  projectTitles = computed(() => {
-    const all = this.proposals() || [];
-    const titles = all.map(p => p.project.title);
-    return Array.from(new Set(titles));
-  });
-
   onSearchChange(value: string) {
     this.searchTerm.set(value);
+    this.page.set(1);
   }
-
   onProjectFilterChange(value: string) {
     this.selectedProjectTitle.set(value);
+    this.page.set(1);
+  }
+  onPageChange(newPage: number) {
+    this.page.set(newPage);
+  }
+  onPageSizeChange(newSize: number) {
+    this.pageSize.set(newSize);
+    this.page.set(1);
+  }
+  onSortByChange(value: string) {
+    this.sortBy.set(value);
+    this.page.set(1);
+  }
+  get pageSizeValue() {
+    return this.pageSize();
+  }
+  setPageSize(val: number) {
+    this.onPageSizeChange(val);
   }
 
-  // Filter proposals for freelancer/client, search, and project title
+  projectTitles = computed(() => {
+    const user = this.user();
+    if (user && this.userRole() === 'client' && 'projects' in user) {
+      return user.projects.map((p: any) => p.title);
+    }
+    if (user && this.userRole() === 'freelancer') {
+      return this.proposals().map((p: any) => p.project.title);
+    }
+    return [];
+  });
+  get pageNumbers() {
+    const pag = this.pagination() as PaginationModel | null;
+    if (!pag || !pag.totalPages) return [];
+    return Array.from({ length: pag.totalPages }, (_, i) => i + 1);
+  }
+  get paginationModel(): PaginationModel | null {
+    return this.pagination() as PaginationModel | null;
+  }
+
+  // Client-side sorting in filteredProposals
   filteredProposals = computed(() => {
-    const u = this.user();
-    let all = this.proposals() || [];
-    if (!u) return [];
-    if (this.userRole() === 'freelancer') {
-      all = all.filter(p => p.freelancer.id === u.id);
-    } else if (this.userRole() === 'client') {
-      all = all.filter(p => p.project.clientId === u.id);
+    let proposals = this.proposals() || [];
+    const sortBy = this.sortBy();
+    if (sortBy === 'Pending') {
+      proposals = [...proposals].sort((a, b) => {
+        const aPending = !a.isAccepted && !a.isRejected;
+        const bPending = !b.isAccepted && !b.isRejected;
+        return (bPending ? 1 : 0) - (aPending ? 1 : 0);
+      });
+    } else if (sortBy === 'Accepted') {
+      proposals = [...proposals].sort((a, b) => {
+        return (b.isAccepted ? 1 : 0) - (a.isAccepted ? 1 : 0);
+      });
+    } else if (sortBy === 'Rejected') {
+      proposals = [...proposals].sort((a, b) => {
+        return (b.isRejected ? 1 : 0) - (a.isRejected ? 1 : 0);
+      });
     }
-    // Filter by project title
-    if (this.selectedProjectTitle()) {
-      all = all.filter(p => p.project.title === this.selectedProjectTitle());
-    }
-    // Filter by search term (description)
-    if (this.searchTerm().trim()) {
-      const term = this.searchTerm().toLowerCase();
-      all = all.filter(p => p.description.toLowerCase().includes(term) || p.project.title.toLowerCase().includes(term));
-    }
-    return all;
+    return proposals;
   });
 }
