@@ -12,7 +12,7 @@ export class ChatRoomModel {
     public projectId: string;
     public clientName: string;
     public freelancerName: string;
-    public Messages: ChatMessageModel[];
+    public messages: ChatMessageModel[];
 
     constructor() {
         this.id = '';
@@ -26,7 +26,7 @@ export class ChatRoomModel {
         this.projectId = '';
         this.clientName = '';
         this.freelancerName = '';
-        this.Messages = [];
+        this.messages = [];
     }
 }
 

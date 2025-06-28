@@ -20,6 +20,9 @@ export class ChatService{
     updateMessage(messageId: string, content: string) {
         return this.http.put<ApiResponse<ChatMessageModel>>(`${this.baseUrl}/Chat/UpdateMessage/${messageId}`, { content });
     }
+    markMessageAsRead(messageId: string, chatRoomId: string, senderId: string) {
+        return this.http.put<ApiResponse<ChatMessageModel>>(`${this.baseUrl}/Chat/SetMessageRead/${messageId}`, { chatRoomId, senderId });
+    }
     deleteMessage(messageId: string, chatRoomId: string) {
         return this.http.delete<ApiResponse<{ success: boolean }>>(`${this.baseUrl}/Chat/DeleteMessage/${messageId}/ChatRoom/${chatRoomId}`);
     }

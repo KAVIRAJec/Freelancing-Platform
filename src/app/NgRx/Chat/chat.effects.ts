@@ -80,4 +80,22 @@ export class ChatEffects {
       )
     )
   );
+
+  markMessageAsRead$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ChatActions.markMessageAsRead),
+      mergeMap(({ messageId, chatRoomId, senderId }) =>
+        this.chatService.markMessageAsRead(messageId, chatRoomId, senderId).pipe(
+          map(res => {
+            if (res.success) {
+              return ChatActions.markMessageAsReadSuccess({ message: res.data });
+            } else {
+              return ChatActions.markMessageAsReadFailure({ error: res.errors || res.message });
+            }
+          }),
+          catchError(error => of(ChatActions.markMessageAsReadFailure({ error: error.message || 'Failed to mark as read' })))
+        )
+      )
+    )
+  );
 }

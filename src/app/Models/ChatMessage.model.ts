@@ -1,7 +1,7 @@
 export class ChatMessageModel {
     public id: string;
     public content: string;
-    public sendAt: Date | null;
+    public sentAt: Date | null;
     public updatedAt: Date | null;
     public deletedAt: Date | null;
     public isRead: boolean;
@@ -12,7 +12,7 @@ export class ChatMessageModel {
     constructor() {
         this.id = '';
         this.content = '';
-        this.sendAt = null;
+        this.sentAt = null;
         this.updatedAt = null;
         this.deletedAt = null;
         this.isRead = false;

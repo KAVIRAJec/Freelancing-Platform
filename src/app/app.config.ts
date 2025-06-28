@@ -21,6 +21,8 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from './Components/toast/toastr-provider';
 import { ProposalEffects } from './NgRx/Proposal/proposal.effects';
 import { proposalReducer } from './NgRx/Proposal/proposal.reducer';
+import { chatReducer } from './NgRx/Chat/chat.reducer';
+import { ChatEffects } from './NgRx/Chat/chat.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -43,6 +45,9 @@ export const appConfig: ApplicationConfig = {
 
     provideState('proposal', proposalReducer),
     provideEffects(ProposalEffects),
+
+    provideState('chat', chatReducer),
+    provideEffects(ChatEffects),
 
     AuthGuard
   ]

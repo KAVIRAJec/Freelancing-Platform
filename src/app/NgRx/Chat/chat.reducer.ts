@@ -7,7 +7,11 @@ export const chatReducer = createReducer(initialChatState,
     loading: true, error: null 
 })),
   on(ChatActions.loadMessagesSuccess, (state, { messages, pagination }) => ({
-    ...state, messages, pagination,
+    ...state, 
+    messages: state.messages.length === 0 || pagination.page === 1
+    ? messages
+    : [...state.messages, ...messages], // append older messages to the end
+    pagination,
     loading: false, error: null
   })),
   on(ChatActions.loadMessagesFailure, (state, { error }) => ({ 
@@ -17,7 +21,7 @@ export const chatReducer = createReducer(initialChatState,
   on(ChatActions.sendMessage, (state) => ({ ...state, loading: true, error: null })),
   on(ChatActions.sendMessageSuccess, (state, { message }) => ({
     ...state,
-    messages: [...state.messages, message],
+    messages: [message, ...state.messages],
     loading: false,
     error: null,
   })),
@@ -49,6 +53,15 @@ export const chatReducer = createReducer(initialChatState,
 
   on(ChatActions.receiveMessage, (state, { message }) => ({
     ...state,
-    messages: [...state.messages, message],
+    messages: [message, ...state.messages],
+  })),
+  on(ChatActions.markMessageAsReadSuccess, (state, { message }) => ({
+    ...state,
+    messages: state.messages.map(m => m.id === message.id ? message : m),
+    loading: false,
+    error: null,
+  })),
+  on(ChatActions.markMessageAsReadFailure, (state, { error }) => ({
+    ...state, loading: false, error
   })),
 );
