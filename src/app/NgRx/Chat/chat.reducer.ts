@@ -19,12 +19,18 @@ export const chatReducer = createReducer(initialChatState,
 })),
 
   on(ChatActions.sendMessage, (state) => ({ ...state, loading: true, error: null })),
-  on(ChatActions.sendMessageSuccess, (state, { message }) => ({
-    ...state,
-    messages: [message, ...state.messages],
-    loading: false,
-    error: null,
-  })),
+  on(ChatActions.sendMessageSuccess, (state, { message }) => {
+    // Prevent duplicate messages (from SignalR and sendMessageSuccess)
+    if (state.messages.some(m => m.id === message.id)) {
+      return state;
+    }
+    return {
+      ...state,
+      messages: [message, ...state.messages],
+      loading: false,
+      error: null,
+    };
+  }),
   on(ChatActions.sendMessageFailure, (state, { error }) => ({ 
     ...state, loading: false, error 
 })),
@@ -51,17 +57,24 @@ export const chatReducer = createReducer(initialChatState,
     ...state, loading: false, error 
 })),
 
-  on(ChatActions.receiveMessage, (state, { message }) => ({
+on(ChatActions.markMessageAsReadSuccess, (state, { message }) => ({
+  ...state,
+  messages: state.messages.map(m => m.id === message.id ? message : m),
+  loading: false,
+  error: null,
+})),
+on(ChatActions.markMessageAsReadFailure, (state, { error }) => ({
+  ...state, loading: false, error
+})),
+
+on(ChatActions.receiveMessage, (state, { message }) => {
+  // Prevent duplicate messages (from sendMessageSuccess and SignalR)
+  if (state.messages.some(m => m.id === message.id)) {
+    return state;
+  }
+  return {
     ...state,
     messages: [message, ...state.messages],
-  })),
-  on(ChatActions.markMessageAsReadSuccess, (state, { message }) => ({
-    ...state,
-    messages: state.messages.map(m => m.id === message.id ? message : m),
-    loading: false,
-    error: null,
-  })),
-  on(ChatActions.markMessageAsReadFailure, (state, { error }) => ({
-    ...state, loading: false, error
-  })),
+  };
+}),
 );

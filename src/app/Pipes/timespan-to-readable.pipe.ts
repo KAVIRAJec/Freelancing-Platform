@@ -6,11 +6,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class TimespanToReadablePipe implements PipeTransform {
   transform(value: string | null | undefined): string {
-    // Accepts both '5.00:00:00' and '00:00:00:00' and '03:04:05:00' formats
     if (!value || typeof value !== 'string') return value || '';
-    // Match 'd.hh:mm:ss' or 'hh:mm:ss' or 'dd:hh:mm:ss'
     let days = 0, hours = 0, minutes = 0, seconds = 0;
-    // Format: '5.00:00:00' (d.hh:mm:ss)
+
+    // Format: '5.00:00:00' => (d.hh:mm:ss)
     const dotMatch = value.match(/^(\d+)\.(\d{2}):(\d{2}):(\d{2})$/);
     if (dotMatch) {
       days = parseInt(dotMatch[1], 10);
@@ -24,13 +23,24 @@ export class TimespanToReadablePipe implements PipeTransform {
       hours = parts[1];
       minutes = parts[2];
       seconds = parts[3];
+    } else if (/^\d{2}:\d{2}:\d{2}$/.test(value)) {
+      // Format: 'hh:mm:ss'
+      const parts = value.split(':').map(Number);
+      hours = parts[0];
+      minutes = parts[1];
+      seconds = parts[2];
     } else {
       return value;
     }
+
     let result = '';
     if (days) result += `${days}d `;
     if (hours) result += `${hours}h `;
     if (minutes) result += `${minutes}m`;
-    return result.trim() || '0m';
+
+    // If all are zero, return '0m'
+    if (!days && !hours && !minutes) result = '0m';
+
+    return result.trim();
   }
 }

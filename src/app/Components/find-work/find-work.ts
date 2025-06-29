@@ -172,6 +172,7 @@ export class FindWork implements OnInit, OnDestroy {
     if (this.proposalForm.invalid || !this.selectedProject) return;
     this.submittingProposal = true;
     const form = this.proposalForm.value;
+    console.log('Submitting proposal form:', form);
     const newProposal: CreateProposalModel = {
       description: form.description,
       proposedAmount: form.proposedAmount,
@@ -179,6 +180,7 @@ export class FindWork implements OnInit, OnDestroy {
       freelancerId: this.currentUserId,
       projectId: this.selectedProject.id
     };
+    console.log('Submitting proposal:', newProposal);
     this.store.dispatch(ProposalActions.addProposal({ proposal: newProposal }));
   }
 

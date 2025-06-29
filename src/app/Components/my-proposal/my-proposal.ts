@@ -10,16 +10,18 @@ import { FreelancerModel } from '../../Models/Freelancer.model';
 import { CommonModule } from '@angular/common';
 import { ProjectProposalService } from '../../Services/projectProposal.service';
 import { TimespanToReadablePipe } from '../../Pipes/timespan-to-readable.pipe';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { PaginationModel } from '../../Models/PaginationModel';
+import { DurationFormatPipe } from '../../Pipes/duration-format.pipe';
+import { ConvertTimeSpan } from '../../Misc/ConvertTimeSpan';
 
 @Component({
   selector: 'app-my-proposal',
   templateUrl: './my-proposal.html',
   styleUrl: './my-proposal.css',
   standalone: true,
-  imports: [CommonModule, FormsModule, TimespanToReadablePipe, ReactiveFormsModule]
+  imports: [CommonModule, FormsModule, DurationFormatPipe, TimespanToReadablePipe, ReactiveFormsModule]
 })
 export class MyProposal {
   proposals;
@@ -90,7 +92,7 @@ export class MyProposal {
     this.editForm = this.fb.group({
       description: ['', [Validators.required, Validators.maxLength(1000)]],
       proposedAmount: [null, [Validators.required, Validators.min(1)]],
-      proposedDuration: ['', [Validators.required]]
+      proposedDuration: ['', [Validators.required, this.durationValidator]]
     });
     this.route.queryParams.subscribe(params => {
       if (params['search']) {
@@ -98,6 +100,17 @@ export class MyProposal {
       }
     });
   }
+
+  durationValidator(control: AbstractControl): ValidationErrors | null {
+      const value = control.value;
+      if (!value) return null;
+      // Accepts '3d 4h 5m', '120', 'P2DT3H4M', etc.
+      const regex = /^((\d+)d)?\s*((\d+)h)?\s*((\d+)m)?$|^P(\d+D)?(T(\d+H)?(\d+M)?)?$|^\d+$/;
+      if (regex.test(value.trim())) {
+        return null;
+      }
+      return { invalidDuration: true };
+    }
 
   // For edit modal
   editingProposal = signal<ProposalModel | null>(null);
@@ -112,11 +125,12 @@ export class MyProposal {
   }
 
   onEdit(proposal: ProposalModel) {
+    const readableDuration = new TimespanToReadablePipe().transform(proposal.proposedDuration);
     this.editingProposal.set(proposal);
     this.editForm.setValue({
       description: proposal.description,
       proposedAmount: proposal.proposedAmount,
-      proposedDuration: proposal.proposedDuration
+      proposedDuration: readableDuration
     });
     this.showEditModal.set(true);
   }
@@ -165,6 +179,7 @@ export class MyProposal {
   // For edit modal save
   onSaveEdit() {
     if (!this.editingProposal() || this.editForm.invalid) return;
+    this.editForm.value.proposedDuration = ConvertTimeSpan.toCSharpTimeSpan(this.editForm.value.proposedDuration);
     this.store.dispatch(ProposalActions.updateProposal({
       proposalId: this.editingProposal()!.id,
       proposal: this.editForm.value
@@ -221,7 +236,15 @@ export class MyProposal {
   // Client-side sorting in filteredProposals
   filteredProposals = computed(() => {
     let proposals = this.proposals() || [];
+    const selectedTitle = this.selectedProjectTitle();
     const sortBy = this.sortBy();
+
+    // Filter by project title if selected
+    if (selectedTitle) {
+      proposals = proposals.filter((p: any) => p.project.title === selectedTitle);
+    }
+
+    // Sort by status
     if (sortBy === 'Pending') {
       proposals = [...proposals].sort((a, b) => {
         const aPending = !a.isAccepted && !a.isRejected;

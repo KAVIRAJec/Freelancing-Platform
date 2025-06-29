@@ -13,6 +13,8 @@ import * as ChatActions from '../../NgRx/Chat/chat.actions';
 import { selectChatMessages, selectChatLoading, selectChatError } from '../../NgRx/Chat/chat.selector';
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { SignalRService } from '../../Services/signalR.service';
+import { ChatNotificationService } from './chat-notification.service';
 
 @Component({
   selector: 'app-chat',
@@ -44,7 +46,9 @@ export class Chat implements OnDestroy, AfterViewInit {
     private chatService: ChatService,
     private authService: AuthenticationService,
     private toastr: ToastrService,
-    private store: Store
+    private store: Store,
+    private signalRService: SignalRService,
+    private chatNotificationService: ChatNotificationService
   ) { }
 
   ngOnInit() {
@@ -91,6 +95,19 @@ export class Chat implements OnDestroy, AfterViewInit {
         }
       })
     );
+    this.subscriptions.add(
+      this.signalRService.chatNotification$.subscribe(message => {
+        if (!message) return;
+        // If message is for the open chat, dispatch to store
+        if (this.selectedRoom() && message.chatRoomId === this.selectedRoom()!.id) {
+          this.store.dispatch(ChatActions.receiveMessage({ message }));
+        } else {
+          // Otherwise, store as notification and show a toast
+          this.chatNotificationService.addNotification(message);
+          this.toastr.info('New message received in chat!', 'Chat Notification');
+        }
+      })
+    );
   }
 
   onScrollTop(event: any) {
@@ -133,6 +150,8 @@ export class Chat implements OnDestroy, AfterViewInit {
     this.selectedRoom.set(room);
     this.messagePage.set(1);
     this.hasMoreMessages.set(true);
+    // Clear notifications for this room when opened
+    this.chatNotificationService.clearNotificationsForRoom(room.id);
     this.store.dispatch(ChatActions.loadMessages({
       chatRoomId: room.id,
       page: this.messagePage(),
@@ -200,13 +219,12 @@ export class Chat implements OnDestroy, AfterViewInit {
     return !msg.isRead && msg.senderId !== this.user()!.id;
   }
   public getUnreadCount(room: ChatRoomModel): number {
-    if (!room.messages) return 0;
-    return room.messages.filter(m => !m.isRead && m.senderId !== this.user()?.id).length;
+    return this.chatNotificationService.getUnreadCountForRoom(room.id);
   }
-  // public getLastMessage(room: ChatRoomModel): string {
-  //   if (!room.messages || room.messages.length === 0) return 'No messages yet';
-  //   return room.messages[room.messages.length - 1].content;
-  // }
+  public getLastUnreadMessage(room: ChatRoomModel): string {
+    const unread = this.chatNotificationService.getNotifications().find(n => n.chatRoomId === room.id);
+    return unread ? unread.content : (room.messages && room.messages.length > 0 ? room.messages[room.messages.length - 1].content : 'No messages yet');
+  }
   public getLastMessageTime(room: ChatRoomModel): string {
     if (!room.messages || room.messages.length === 0) return '';
     const msg = room.messages[room.messages.length - 1];

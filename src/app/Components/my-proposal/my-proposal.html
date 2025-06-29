@@ -130,7 +130,13 @@
       <div class="mb-2">
         <label>Duration</label>
         <input type="text" formControlName="proposedDuration" class="w-full border rounded p-2" [class.border-red-500]="editForm.get('proposedDuration')?.invalid && editForm.get('proposedDuration')?.touched" />
-        <div *ngIf="editForm.get('proposedDuration')?.invalid && editForm.get('proposedDuration')?.touched" class="text-red-500 text-xs mt-1">Duration is required.</div>
+        <div *ngIf="editForm.get('proposedDuration')?.invalid && editForm.get('proposedDuration')?.touched" class="text-red-500 text-xs mt-1">
+          <span *ngIf="editForm.get('proposedDuration')?.hasError('required')">Duration is required.</span>
+          <span *ngIf="editForm.get('proposedDuration')?.hasError('invalidDuration')">Please enter a valid duration (e.g. '3d 4h 5m', '120', or ISO format).</span>
+        </div>
+        <div *ngIf="editForm.get('proposedDuration')?.valid && editForm.get('proposedDuration')?.value" class="text-xs text-green-600 mt-1">
+          Preview: {{ editForm.get('proposedDuration')?.value | durationFormat }}
+        </div>
       </div>
       <div class="flex justify-end mt-4">
         <button type="button" class="btn btn-secondary mr-2" (click)="showEditModal.set(false)">Cancel</button>
