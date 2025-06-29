@@ -130,7 +130,9 @@
     }
 
     <!-- Mobile Side Drawer Menu -->
-    <div id="mobile-menu" class="md:hidden absolute top-2 right-0 rounded-lg h-auto w-auto bg-clr-LightIvory shadow-2xl z-50 transform transition-transform duration-300" [ngClass]="{ 'translate-x-0': showMobileMenu, 'translate-x-full': !showMobileMenu }">
+    <div id="mobile-menu"
+         class="md:hidden absolute top-2 right-0 rounded-lg h-auto w-auto bg-clr-LightIvory shadow-2xl z-50 transform transition-transform duration-300"
+         [ngClass]="{ 'translate-x-0': showMobileMenu, 'translate-x-full mobile-menu-hidden': !showMobileMenu }">
         <div class="flex justify-end p-4">
             <button (click)="toggleMobileMenu()" class="text-2xl text-primary-section focus:outline-none">
             <i class="bi bi-x menu"></i>
@@ -161,7 +163,7 @@
         }
     </div>
     <!-- Hamburger Icon for Mobile -->
-    <button class="md:hidden fixed top-4 right-4 z-50 flex items-center px-2 py-1 border rounded text-white border-white focus:outline-none" (click)="toggleMobileMenu()">
+    <button class="md:hidden absolute top-4 right-4 z-50 flex items-center px-2 py-1 border rounded text-white border-white focus:outline-none" (click)="toggleMobileMenu()">
     <i class="bi bi-list menu" [style]="{ 'visibility': showMobileMenu ? 'hidden' : 'visible' }"></i>
     </button>
 
