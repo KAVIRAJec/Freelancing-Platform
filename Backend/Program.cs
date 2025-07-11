@@ -110,7 +110,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowUsers", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200", "http://localhost:4201", "https://localhost:8080", "http://localhost:8081")
+            .WithOrigins("http://localhost:4200", "http://localhost:4201", "https://localhost:8080", "http://localhost:8081",
+                "https://freelancing-platform-ux86.onrender.com")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -167,7 +168,6 @@ builder.Services.AddTransient<IChatService, ChatService>();
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddTransient<ImageUploadService>();
-
 #endregion
 
 #region JWT Authentication Service
