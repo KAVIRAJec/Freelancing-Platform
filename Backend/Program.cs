@@ -249,15 +249,41 @@ builder.Services.AddTransient<IGetOrCreateSkills, GetOrCreateSkillService>();
 
 var app = builder.Build();
 
-// Auto-migrate database on startup for production
-if (app.Environment.IsProduction())
+#region AutoApply migration
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
+    try
     {
         var context = scope.ServiceProvider.GetRequiredService<FreelanceDBContext>();
-        context.Database.Migrate();
+        // Check if database exists and has any applied migrations
+        var pendingMigrations = context.Database.GetPendingMigrations();
+        var appliedMigrations = context.Database.GetAppliedMigrations();
+        if (!appliedMigrations.Any())
+        {
+            context.Database.EnsureCreated();
+            Log.Information("Database created successfully");
+        }
+        
+        if (pendingMigrations.Any())
+        {
+            // Apply pending migrations
+            context.Database.Migrate();
+            Log.Information($"Applied {pendingMigrations.Count()} pending migrations");
+        }
+        else
+        {
+            Log.Information("No pending migrations found");
+        }
+        
+        Log.Information("Database migration check completed successfully");
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "An error occurred while migrating the database");
+        Log.Warning("Application starting without successful migration");
     }
 }
+#endregion
 
 app.UseSerilogRequestLogging();
 app.UseMiddleware<GlobalExceptionMiddleware>();
