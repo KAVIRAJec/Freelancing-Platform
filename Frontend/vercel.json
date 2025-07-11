@@ -3,6 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/freelance-project",
   "installCommand": "npm install --force",
+  "framework": "angular",
   "rewrites": [
     {
       "source": "/(.*)",
