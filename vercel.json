@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": "cd Frontend && npm install --force && npm run build",
-  "outputDirectory": "Frontend/dist/Freelance-Project",
+  "outputDirectory": "Frontend/dist/Freelance-Project/browser",
   "rewrites": [
     {
       "source": "/(.*)",
