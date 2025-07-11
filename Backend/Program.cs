@@ -249,6 +249,16 @@ builder.Services.AddTransient<IGetOrCreateSkills, GetOrCreateSkillService>();
 
 var app = builder.Build();
 
+// Auto-migrate database on startup for production
+if (app.Environment.IsProduction())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<FreelanceDBContext>();
+        context.Database.Migrate();
+    }
+}
+
 app.UseSerilogRequestLogging();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
