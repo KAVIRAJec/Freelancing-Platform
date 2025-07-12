@@ -27,7 +27,11 @@ export class SignalRService {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(
         `${environment.baseUrl.replace('/api/v1', '')}/notificationhub`,
-        { accessTokenFactory: () => token }
+        {
+          accessTokenFactory: () => token,
+          transport: signalR.HttpTransportType.WebSockets,
+          skipNegotiation: false
+         }
       )
       .withAutomaticReconnect()
       .build();

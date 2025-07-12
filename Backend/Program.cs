@@ -111,7 +111,7 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins("http://localhost:4200", "http://localhost:4201", "https://localhost:8080", "http://localhost:8081",
-                "https://freelancing-platform-nine.vercel.app")
+                "https://freelancing-platform-nine.vercel.app", "https://freelancing-platform-ux86.onrender.com")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
