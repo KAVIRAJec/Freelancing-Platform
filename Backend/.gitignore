@@ -2,3 +2,6 @@ https/
 
 # Ignore files
 appsettings.json
+Logs
+obj
+bin
